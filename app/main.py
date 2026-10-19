@@ -1,19 +1,6 @@
 from fastapi import FastAPI
-from dotenv import load_dotenv
 
-from app.controllers import health_controller
-from app.configs.settings import get_settings
-
-
-load_dotenv()
-
-settings = get_settings()
-
-app = FastAPI(
-    title = settings.app_name,
-)
-
-app.include_router(health_controller.router)
+app = FastAPI()
 
 
 @app.get("/")
