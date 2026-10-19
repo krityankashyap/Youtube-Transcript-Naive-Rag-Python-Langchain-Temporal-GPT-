@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from functools import lru_cache
 
 class Setting(BaseSettings):
     """env Settings for the applications"""
@@ -46,7 +46,7 @@ class Setting(BaseSettings):
     # Optional RAGAS (Stage 6)
     enable_ragas_evaluation: bool = False
 
-
+@lru_cache
 def get_settings() -> Setting:
     """Get the settings for the application."""
     return Setting()
