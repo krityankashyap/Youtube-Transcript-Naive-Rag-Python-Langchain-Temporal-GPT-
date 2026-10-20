@@ -2,14 +2,19 @@ from fastapi import FastAPI
 from dotenv import load_dotenv
 from app.configs.settings import Setting, get_settings
 from app.controllers.health_controller import router as health_router
+from app.utils import configure_logging, get_logger
 
 load_dotenv()
+
+configure_logging()
+logger = get_logger(__name__)
 
 settings= get_settings()
 
 app = FastAPI(
-    title= settings.app_name    
+    title= settings.app_name
 )
+logger.info("Starting %s", settings.app_name)
 
 
 @app.get("/")

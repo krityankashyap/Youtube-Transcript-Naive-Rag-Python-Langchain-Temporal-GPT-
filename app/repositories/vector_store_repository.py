@@ -3,8 +3,11 @@ from qdrant_client import QdrantClient
 from functools import lru_cache
 from langchain_qdrant import QdrantVectorStore
 from app.services.embeddings import get_embeddings
+from app.utils import get_logger
 from langchain_core.documents import Documents
 import uuid
+
+logger = get_logger(__name__)
 
 
 @lru_cache
@@ -43,14 +46,17 @@ class VectorStoreRepository:
   def add_documents(self, documents: list[Documents]) -> list[str]:
     """Add documents to the vector store."""
     if not documents:
+      logger.debug("add_documents called with no documents; skipping")
       return []
-    
+
     ids= [str[uuid.uuid4()] for _ in documents]
+    logger.info("Adding %d documents to collection '%s'", len(documents), self.collection_name)
     self.vector_store.add_documents(documents=documents, ids=ids)
     return ids
-  
+
 
   def delete_documents(self) -> None:
+    logger.warning("Deleting collection '%s'", self.collection_name)
     self.client.delete_collection(collection_name=self.collection_name)
   
 
@@ -59,6 +65,7 @@ class VectorStoreRepository:
     """Search the vector store with a query and return documents with scores."""
     settings= get_settings()
     k= k or settings.retrieval_k
+    logger.info("Similarity search (with score) k=%d for query: %r", k, query)
     return self.vector_store.similarity_search_with_score(query=query, k=k)
   
   
@@ -66,4 +73,5 @@ class VectorStoreRepository:
     """Search the vector store with a query and return documents."""
     settings= get_settings()
     k= k or settings.retrieval_k
+    logger.info("Similarity search k=%d for query: %r", k, query)
     return self.vector_store.similarity_search(query=query, k=k)
