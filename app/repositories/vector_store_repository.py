@@ -48,3 +48,22 @@ class VectorStoreRepository:
     ids= [str[uuid.uuid4()] for _ in documents]
     self.vector_store.add_documents(documents=documents, ids=ids)
     return ids
+  
+
+  def delete_documents(self) -> None:
+    self.client.delete_collection(collection_name=self.collection_name)
+  
+
+
+  def search_with_score(self, query: str, k: int | None = None) -> list[tuple[Documents, float]]:
+    """Search the vector store with a query and return documents with scores."""
+    settings= get_settings()
+    k= k or settings.retrieval_k
+    return self.vector_store.similarity_search_with_score(query=query, k=k)
+  
+  
+  def search(self, query: str, k: int | None = None) -> list[Documents]:
+    """Search the vector store with a query and return documents."""
+    settings= get_settings()
+    k= k or settings.retrieval_k
+    return self.vector_store.similarity_search(query=query, k=k)
