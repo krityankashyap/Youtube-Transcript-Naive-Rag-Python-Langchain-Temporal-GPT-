@@ -12,7 +12,9 @@ class DocumentService:
 
   SUPPORTED_FILE_EXTENSIONS= {".csv"}
 
-  def __init__(slef, chunk_size: int | None = None, chunk_overlap: int | None = None):
+  TRANSCRIPT_CSV_COLUMNS= ["id", "start", "end", "text", "url", "channel_id", "title", "published"]
+
+  def __init__(self, chunk_size: int | None = None, chunk_overlap: int | None = None):
     settings= Settings()
     self.chunk_size= chunk_size or settings.chunk_size
     self.chunk_overlap= chunk_overlap or settings.chunk_overlap
@@ -23,8 +25,20 @@ class DocumentService:
       seperator= ["/n/n", "/n", " ", ""],
       length_function= len
     )
+  
+  def _is_transcript_csv(self, file_path: PATH) -> bool:
+    """Check if the given CSV file is a transcript CSV based on its columns."""
+    with file_path.open(newline="", encoding="utf-8") as csvfile:
+      reader= csv.DictReader(csvfile)
+      if not reader.fieldnames:
+        logger.warning("CSV file '%s' has no header; cannot determine if it's a transcript CSV", file_path)
+        return False
+      
+      fields= set[str](reader.fieldnames)
+      return self.TRANSCRIPT_CSV_COLUMNS.issubset(fields) and len(fields) == len(self.TRANSCRIPT_CSV_COLUMNS)
 
-  def load_csv_documents(self, file_path: PATH) -> list[Documents]:
+
+  def load_csv_documents(self, file_path: PATH, source_name: str) -> list[Documents]:
     """Load CSV documents from the given file path."""
 
     documents: list[Documents]= []
@@ -40,6 +54,7 @@ class DocumentService:
           continue
 
         metadata= {
+          "source": source_name,
           "id": row.get("id"),
           "start": row.get("start"),
           "end": row.get("end"),
@@ -52,4 +67,8 @@ class DocumentService:
         documents.append(Documents(page_content=text, metadata=metadata))
 
     return documents
+  
+  def split_documents(self, documents: list[Documents]) -> list[Documents]:
+    """Split documents into chunks using the text splitter."""
+    
 
