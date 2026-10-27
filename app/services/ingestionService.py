@@ -29,5 +29,20 @@ class IngestionService:
       logger.info("Saved file '%s' to '%s'", filename, dest)
 
     return batch_id, paths
+  
+  def ingest_file_at_paths(self, file_path: Path, socurce_name: str | None= None) -> dict:
+    """Ingest a file at the given path into the vector store."""
+    name= socurce_name or file_path.name 
+    chunks= self.document_service.process_file(file_path, source_name=name)
+
+    if not chunks:
+      logger.warning("No chunks generated from file '%s'; skipping ingestion", file_path)
+      return {"source": name, "chunks_added": 0}
+    
+    chunks_ids= self.vector_store_repository.add_documents(chunks)
+    return {"source": name, "chunks_added": len(chunks_ids), "chunk_ids": chunks_ids}
+
+    
+
 
 
