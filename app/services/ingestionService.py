@@ -41,6 +41,24 @@ class IngestionService:
     
     chunks_ids= self.vector_store_repository.add_documents(chunks)
     return {"source": name, "chunks_added": len(chunks_ids), "chunk_ids": chunks_ids}
+  
+  def ingest_file_sync(self, file_pairs: list[tuple[str, bytes]]) -> dict:
+    """Ingest files synchronously."""
+    _, paths= self.save_batch_upload(file_pairs)
+
+    results= []
+
+    for path in paths:
+      result= self.ingest_file_at_paths(path)
+      results.append(result)
+
+      total_chunks= sum(res.get("chunks_added", 0) for res in results)
+      return {
+        "total_chunks": total_chunks,
+        "files": results,
+        "message": f"Ingested {len(results)} files with a total of {total_chunks} chunks.",
+        "filesUploaded": len(results)
+      }
 
     
 
