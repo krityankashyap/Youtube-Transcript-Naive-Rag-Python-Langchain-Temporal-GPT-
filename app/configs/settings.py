@@ -42,6 +42,7 @@ class Setting(BaseSettings):
 
     # Ingestion mode: false = sync (Stage 4), true = Temporal worker required
     use_temporal_ingestion: bool = False
+    uploads_dir: str = "uploads"
 
     # Optional RAGAS (Stage 6)
     enable_ragas_evaluation: bool = False
