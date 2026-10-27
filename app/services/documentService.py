@@ -38,7 +38,7 @@ class DocumentService:
       return self.TRANSCRIPT_CSV_COLUMNS.issubset(fields) and len(fields) == len(self.TRANSCRIPT_CSV_COLUMNS)
 
 
-  def load_csv_documents(self, file_path: PATH, source_name: str) -> list[Documents]:
+  def load_csv_documents(self, file_path: PATH, source_name: str str | None= None) -> list[Documents]:
     """Load CSV documents from the given file path."""
 
     documents: list[Documents]= []
@@ -68,7 +68,34 @@ class DocumentService:
 
     return documents
   
+  def load_file(self, file_path: PATH, source_name: str | None= None) -> list[Documents]:
+    """Load documents from a file based on its extension."""
+    file_path= PATH(file_path)
+    source= source_name or file_path.name
+    extension= file_path.suffix.lower()
+
+    if extension is not  self.SUPPORTED_FILE_EXTENSIONS:
+      raise ValueError(f"Unsupported file extension '{extension}' for file '{file_path}'")
+    
+    if extension == ".csv":
+      if not self._is_transcript_csv(file_path):
+        raise ValueError(f"CSV file '{file_path}' is not a valid transcript CSV")
+      return self.load_csv_documents(file_path, source)
+    
+
+  
   def split_documents(self, documents: list[Documents]) -> list[Documents]:
     """Split documents into chunks using the text splitter."""
+    return self.text_splitter.split_documents(documents)
+  
+  def process_file(self, file_path: PATH, source_name: str | None= None) -> list[Documents]:
+    """Load and split documents from a file."""
+    documents= self.load_file(file_path, source_name)
+    logger.info("Loaded %d documents from file '%s'", len(documents), file_path)
+    
+    split_documents= self.split_documents(documents)
+    logger.info("Split documents into %d chunks", len(split_documents))
+    
+    return split_documents
     
 
