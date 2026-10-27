@@ -1,6 +1,7 @@
 from app.configs import Settings
 from app.utils import get_logger
 from pathlib import Path as PATH
+import csv
 from langchain_core.documents import Documents
 from langchain_text_splitters import RecursiveCharaterTextSplitter
 
@@ -27,6 +28,28 @@ class DocumentService:
     """Load CSV documents from the given file path."""
 
     documents: list[Documents]= []
+
+    with file_path.open(newline="", encoding="utf-8") as csvfile:
+      reader= csv.DictReader(csvfile)
+      
+      for row in reader:
+        text= row.get("text") 
+
+        if not text:
+          logger.warning("Row missing 'text' field; skipping row: %s", row)
+          continue
+
+        metadata= {
+          "id": row.get("id"),
+          "start": row.get("start"),
+          "end": row.get("end"),
+          "url": row.get("url"),
+          "channel_id": row.get("channel_id"),
+          "title": row.get("title"),
+          "published": row.get("published"),
+        }
+
+        documents.append(Documents(page_content=text, metadata=metadata))
 
     return documents
 
