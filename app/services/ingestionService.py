@@ -9,7 +9,7 @@ logger= get_logger(__name__)
 
 class IngestionService:
 
-  def __self__(self):
+  def __init__(self):
     self.document_service= DocumentService()
     self.settings= get_settings()
     self.vector_store_repository= VectorStoreRepository()
@@ -18,6 +18,7 @@ class IngestionService:
     """Save a batch of uploaded files to the designated uploads directory."""
     batch_id= str(uuid.uuid4())
     batch_dir= Path(self.settings.uploads_dir) / batch_id
+    batch_dir.mkdir(parents=True, exist_ok=True)
 
     paths: list[Path]= []
 
@@ -52,13 +53,13 @@ class IngestionService:
       result= self.ingest_file_at_paths(path)
       results.append(result)
 
-      total_chunks= sum(res.get("chunks_added", 0) for res in results)
-      return {
-        "total_chunks": total_chunks,
-        "files": results,
-        "message": f"Ingested {len(results)} files with a total of {total_chunks} chunks.",
-        "filesUploaded": len(results)
-      }
+    total_chunks= sum(res.get("chunks_added", 0) for res in results)
+    return {
+      "total_chunks": total_chunks,
+      "files": results,
+      "message": f"Ingested {len(results)} files with a total of {total_chunks} chunks.",
+      "filesUploaded": len(results)
+    }
 
     
 

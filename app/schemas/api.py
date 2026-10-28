@@ -10,7 +10,7 @@ class HealthResponse(BaseModel):
 class DocumentBatchUploadDocumentResponse(BaseModel):
     """Schema for batch document upload response."""
 
-    chunks_added: int = Field(..., description="Number of chunks added from the document.")
-    files: list[dict]= Field(..., description="List of files processed with their respective chunk counts.")
-    total_files: int = Field(..., description="Total number of files processed.")
     message: str = Field(..., description="A message summarizing the upload result.")
+    total_chunks: int = Field(..., description="Total number of chunks added across all files.")
+    files_uploaded: int = Field(..., description="Total number of files processed.")
+    files: list[dict]= Field(..., description="List of files processed with their respective chunk counts.")

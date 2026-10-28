@@ -27,7 +27,7 @@ async def upload_document(files: list[UploadFile]= File(..., description="The fi
     logger.warning("Too many files provided for upload: %d", len(files))
     raise HTTPException(status_code=400, detail=f"Too many files provided for upload. Maximum allowed is {settings.max_files_per_upload}.")
   
-  file_pairs= list[tuple[str, bytes]]= []
+  file_pairs: list[tuple[str, bytes]]= []
 
   for file in files:
     if not file.filename:
