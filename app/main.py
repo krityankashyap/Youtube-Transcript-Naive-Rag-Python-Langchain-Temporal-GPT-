@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from app.configs.settings import Setting, get_settings
 from app.controllers.health_controller import router as health_router
 from app.utils import configure_logging, get_logger
+from app.controllers import document_controller
 
 load_dotenv()
 
@@ -22,6 +23,7 @@ def hello() -> dict[str, str]:
     return {"message": "Hello, World!"}
 
 app.include_router(health_router)
+app.include_router(document_controller.router)
 
 def main() -> None:
     import uvicorn
