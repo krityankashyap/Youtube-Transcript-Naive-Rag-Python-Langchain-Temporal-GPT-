@@ -13,20 +13,20 @@ async def _to_documents(payload: list[dict]) -> list[Document]:
   """Convert a list of dictionaries to a list of Document objects."""
   return [Document.from_dict(doc) for doc in payload]
 
-@activity.defn(name="parse_document_activity", description="Parse a document and return its chunks")
+@activity.defn(name="parse_document_activity")
 async def parse_document_activity(local_path: str, filename: str) -> list[dict]:
   service= DocumentService()
   docs= service.load_file(Path(local_path), source_name= filename)
   return await _to_dicts(docs)
 
-@activity.defn(name="split_text_activity", description="Split text into chunks and return them")
+@activity.defn(name="split_text_activity")
 async def chunk_document_activity(documents: list[dict])-> list[dict]:
   """Split text in documents into chunks and return them."""
   service= DocumentService()
   chunks= service.split_documents(documents=await _to_documents(documents))
   return await _to_dicts(chunks)
 
-@activity.defn(name="index_document_activity", description="Index documents into the vector store and return their IDs")
+@activity.defn(name="index_document_activity")
 async def index_document_activity(chunks: list[dict]) -> int:
   """Index documents into the vector store and return their IDs."""
   if not chunks:
