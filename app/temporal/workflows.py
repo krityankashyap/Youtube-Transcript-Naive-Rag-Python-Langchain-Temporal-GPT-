@@ -2,7 +2,9 @@ from datetime import timedelta
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 from app.temporal.types import IngestionWorkflowInput, IngestionWorkflowResult, FileIngestionResult
-from app.temporal.activities import parse_document_activity, chunk_document_activity, index_document_activity
+
+with workflow.unsafe.imports_passed_through():
+  from app.temporal.activities import parse_document_activity, chunk_document_activity, index_document_activity
 
 
 @workflow.defn(name="ingestion_workflow", description="Ingest a batch of documents into the vector store")
