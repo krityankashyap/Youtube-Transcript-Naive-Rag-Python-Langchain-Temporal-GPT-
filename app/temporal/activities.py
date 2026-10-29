@@ -2,6 +2,7 @@ from app.services.documentService import DocumentService
 from temporalio import activity
 from langchain_core.documents import Document
 from pathlib import Path
+from app.repositories.vector_store_repository import VectorStoreRepository
 
 
 async def _to_dicts(documents: list[Document])-> list[dict]:
@@ -24,3 +25,16 @@ async def chunk_document_activity(documents: list[dict])-> list[dict]:
   service= DocumentService()
   chunks= service.split_documents(documents=await _to_documents(documents))
   return await _to_dicts(chunks)
+
+@activity.defn(name="index_document_activity", description="Index documents into the vector store and return their IDs")
+async def index_document_activity(chunks: list[dict]) -> int:
+  """Index documents into the vector store and return their IDs."""
+  if not chunks:
+    return 0
+  repoService= VectorStoreRepository()
+  chnks= await _to_documents(chunks)
+  ids= repoService.add_documents(chnks)
+  activity.logger.info("Indexed %d chunks into the vector store", len(ids))
+  return len(ids)
+
+  
