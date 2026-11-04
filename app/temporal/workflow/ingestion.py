@@ -4,7 +4,7 @@ from typing import Any
 from temporalio import workflow
 
 with workflow.unsafe.imports_passed_through():
-  from app.temporal.activity.ingestion import (
+  from app.temporal.activity.Ingestion import (
     parse_document_activity,
     chunk_document_activity,
     index_document_activity
@@ -26,7 +26,7 @@ class BatchIngestProgress:
   file_result: list[dict[str, Any]]= field(default_factory=list)
 
 @workflow.defn(name="batch_ingest_workflow")
-class BatchIngestWorkflow:
+class BatchIngestionWorkflow:
   """A workflow to ingest a batch of files into the vector store."""
 
   def __init__(self):
@@ -60,9 +60,9 @@ class BatchIngestWorkflow:
         start_to_close_timeout= 60
       )
 
-      int indexed= 0
+      indexed= 0
 
-      for start in range[0, len(chunk_dicts), batch_size]:
+      for start in range(0, len(chunk_dicts), batch_size):
         batch= chunk_dicts[start: start + batch_size]
         count= await workflow.execute_activity(
           index_document_activity,
@@ -73,12 +73,12 @@ class BatchIngestWorkflow:
 
         indexed += count
 
-        self.progress.files_completed+= 1
-        self.progress.file_result.append({
-          "filename": file_input.filename,
-          "chunk_size": indexed,
-          "document_ids": []
-        })
+      self.progress.files_completed+= 1
+      self.progress.file_result.append({
+        "filename": file_input.filename,
+        "chunk_size": indexed,
+        "document_ids": []
+      })
 
     self.progress.status= "COMPLETED"
     self.progress.current_filename= ""
