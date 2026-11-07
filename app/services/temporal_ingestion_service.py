@@ -6,6 +6,8 @@ from app.temporal.workflow.ingestion import FileIngestInput
 from app.temporal.client import temporal_client
 from app.temporal.workflow.ingestion import BatchIngestionWorkflow
 
+
+
 logger= get_logger(__name__)
 
 class TemporalIngestionService:
@@ -68,4 +70,10 @@ class TemporalIngestionService:
         "current_filename": data.get("current_filename"),
         "file_result": data.get("file_result"),
       }
+    
+    return {
+      "workflow_id": workflow_id,
+      "status": "UNKNOWN",
+      "message": "No progress information available for this workflow."
+    }
 
